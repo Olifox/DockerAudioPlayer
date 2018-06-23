@@ -1,0 +1,22 @@
+version: '2'
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - "27100:27017"
+
+  mongo_seed:
+    build: ./mongo-seed
+    links:
+      - mongodb
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "1337:3000"
+    links:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Audio PLayer</title>
+    <link rel="stylesheet" href="codebase/webix.css" type="text/css">
+    <script src="codebase/webix.js" type="text/javascript"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        var selected;
+        var coverPath = "imgs/OneMoreLight.jpg";
+        var selectedAudio = "NobodyCanSaveMe";
+        var currentAudio;
+        var audio;
+
+        var tree = {
+            view: "tree",
+            id: "myTree",
+            url: "/recordsData",
+			select: true,
+            on: {
+                onSelectChange: function () {
+                    selected = $$("myTree").getItem($$("myTree").getSelectedId()).songs;
+
+                    if (isNaN(selected)) {
+                        $$("myList").clearAll();
+                        $$("myList").parse(selected);
+                        coverPath = "imgs/" + $$("myTree").getSelectedId() + ".jpg"
+                        $$("myCover").data.src = coverPath;
+                        $$("myCover").refresh()
+                    }
+                }
+            }
+        };
+
+        webix.ui({
+            rows: [
+                { type: "header", template: "Online Audio Player" },
+                {
+                    cols: [
+                        {
+                            rows: [
+                                tree,
+                                {
+                                    width: 268, height: 268, id: "myCover", data: { src: coverPath },
+                                    template: function (obj) {
+                                        return '<img src="' + obj.src + '"/>'
+                                    }
+                                }
+                            ]
+                        },
+                        { view: "resizer" },
+                        {
+                            rows: [
+                                {
+                                    view: "datatable",
+                                    id: "myList",
+                                    autoConfig: true,
+                                    url: selected,
+                                    select: "row",
+                                    columns: [
+                                        { id: "title", header: "Title", fillspace: true },
+                                        { id: "duration", header: "Duration", width: 100 }
+                                    ],
+                                    on: {
+                                        onSelectChange: function () {
+                                            selectedAudio = $$("myList").getSelectedId().id;
+                                        }
+                                    }
+                                },
+                                {
+                                    cols: [
+                                        { gravity: 3 },
+                                        { view: "button", value: "< Previous", click: Previous },
+                                        { view: "button", value: "Play / Pause", click: PlayPauseMusic },
+                                        { view: "button", value: "Next >", click: Next }]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        function PlayPauseMusic() {
+
+            if (audio != undefined) {
+                if (currentAudio == selectedAudio) {
+                    if (audio.paused)
+                        audio.play();
+                    else
+                        audio.pause();
+                }
+                else {
+                    audio.pause();
+                    SetCurrentAudio();
+                }
+            }
+            else {
+                SetCurrentAudio();
+            }
+        }
+
+        function SetCurrentAudio() {
+            var audioUrl;
+            for (var i = 0; i < selected.length; i++)
+                if (selected[i].id == selectedAudio) {
+                    audioUrl = selected[i].url;
+                    break;
+                }
+            audio = new Audio(audioUrl);
+            currentAudio = selectedAudio;
+            audio.play();
+        }
+
+        function Previous() {
+            $$("myList").moveSelection("up");
+            selectedAudio = $$("myList").getSelectedId();
+            PlayPauseMusic();
+        }
+
+        function Next() {
+            $$("myList").moveSelection("down");
+            selectedAudio = $$("myList").getSelectedId();
+            PlayPauseMusic();
+        }
+    </script>
+</body>
+</html>
