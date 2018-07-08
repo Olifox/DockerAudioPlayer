@@ -1,12 +1,13 @@
-FROM node:latest
+FROM node
 
-WORKDIR /app
+RUN mkdir /var/app
+WORKDIR /var/app
 
-COPY package*.json ./
+ADD package.json ./
 
 RUN npm install
 
-COPY src /app
+COPY src ./
 
-EXPOSE 8080
+EXPOSE 3000
 CMD [ "node", "server.js" ]
